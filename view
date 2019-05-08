@@ -1,0 +1,61 @@
+#!/usr/bin/python
+# test with: QUERY_STRING="page=1&fit=no&title=startrek_boldlygo_vol1" ./view
+import os
+import shutil
+import sys
+import random
+import ctypes
+import re
+
+# parse query string
+qs = {}
+try:
+  for pair in os.environ['QUERY_STRING'].split('&'):
+    try:
+      pair = pair.split('=')
+      qs[pair[0]] = pair[1]
+    except: pass
+except: pass
+if 'page' not in qs or 'title' not in qs or 'fit' not in qs:
+  print("Error")
+  sys.exit(1)
+if qs['fit'] == 'yes':
+  print("fit not supported yet")
+  exit(1)
+
+# header
+print("""<!DOCTYPE html>
+<html>
+<head>
+<title>Test</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>""")
+if qs['fit'] == 'yes':
+  print('img { max-height: 100%; }')
+  # todo https://stackoverflow.com/questions/6169666/how-to-resize-an-image-to-fit-in-the-browser-window
+else:
+  print('img { min-width: 100%; max-width: 100%; height: auto; }')
+print("""</style>
+</head>
+<body>""")
+
+# determine image filename format
+sample = os.listdir('books/' + qs['title'])[0]
+# I'm assuming format is XXXXX_00003.jpg
+# count digits used
+page_index = sample.rfind('_') + 1
+count = sample.rfind('.') - page_index
+
+# build image filename
+page = int(qs['page'])
+filename = ("{}{:0>"+str(count)+"d}.jpg").format(sample[0:page_index], page)
+next_qs = "page={}&fit={}&title={}".format(page + 1, qs['fit'], qs['title'])
+
+# view requested page
+print('<a href="view?{}"><img src="books/{}/{}" /></a>'.format(next_qs, qs['title'], filename))
+
+# footer
+print("""</body>
+</html>""")
+

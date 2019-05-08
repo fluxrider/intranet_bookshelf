@@ -11,9 +11,14 @@ img { min-width: 100%; max-width: 100%; height: auto; }
 <body>
 
 <script>
-var q = new URLSearchParams(window.location.search);
-if(q.has('img')) {
-  document.writeln('<a href="?img=i003"><img src="test/' + q.get('img') + '.jpg"></a>');
+var qs = window.location.search.substr(1).split('&').reduce(function (q, query) {
+  var chunks = query.split('=');
+  var key = chunks[0];
+  var value = chunks[1];
+  return (q[key] = value, q);
+}, {});
+if(qs['img']) {
+  document.writeln('<a href="?img=i003"><img src="test/' + qs['img'] + '.jpg"></a>');
 } else {
   document.writeln('<a href="?img=i002"><img src="test/cover.jpg"></a>');
 }
