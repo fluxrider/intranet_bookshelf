@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+img { min-width: 100%; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+
+<script>
+var q = new URLSearchParams(window.location.search);
+if(q.has('img')) {
+  document.writeln('<a href="?img=i003"><img src="test/' + q.get('img') + '.jpg"></a>');
+} else {
+  document.writeln('<a href="?img=i002"><img src="test/cover.jpg"></a>');
+}
+</script>
+
+</body>
+</html>
+

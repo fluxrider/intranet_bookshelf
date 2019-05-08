@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+img { min-width: 100%; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+
+<script>
+var qs = window.location.search.substr(1).split('&').reduce(function (q, query) {
+  var chunks = query.split('=');
+  var key = chunks[0];
+  var value = chunks[1];
+  return (q[key] = value, q);
+}, {});
+if(qs['img']) {
+  document.writeln('<a href="?img=i003"><img src="test/' + qs['img'] + '.jpg"></a>');
+} else {
+  document.writeln('<a href="?img=i002"><img src="test/cover.jpg"></a>');
+}
+</script>
+
+</body>
+</html>
+
