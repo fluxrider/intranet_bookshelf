@@ -26,9 +26,9 @@ if qs['fit'] == 'yes':
 # header
 print("""<!DOCTYPE html>
 <html>
-<head>
-<title>Test</title>
-<meta charset="utf-8" />
+<head>""")
+print("<title>{}</title>".format(qs['title']))
+print("""<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 #progress {
@@ -67,6 +67,8 @@ print('<a href="view?{}"><img src="books/{}/{}" /></a>'.format(next_qs, qs['titl
 
 # page progress
 print('<div id="progress">{} / {} ({:1.2f}%)</div>'.format(page, len(listing), page / len(listing)))
+
+# save page progress
 
 # footer
 print("""</body>
