@@ -30,7 +30,16 @@ print("""<!DOCTYPE html>
 <title>Test</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>""")
+<style>
+#progress {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 2;
+  color:black;
+  background-color:#FFFFFF88;
+}
+""")
 if qs['fit'] == 'yes':
   print('img { max-height: 100%; }')
   # todo https://stackoverflow.com/questions/6169666/how-to-resize-an-image-to-fit-in-the-browser-window
@@ -41,7 +50,8 @@ print("""</style>
 <body>""")
 
 # determine image filename format
-sample = os.listdir('books/' + qs['title'])[0]
+listing = os.listdir('books/' + qs['title'])
+sample = listing[0]
 # I'm assuming format is XXXXX_00003.jpg
 # count digits used
 page_index = sample.rfind('_') + 1
@@ -54,6 +64,9 @@ next_qs = "page={}&fit={}&title={}".format(page + 1, qs['fit'], qs['title'])
 
 # view requested page
 print('<a href="view?{}"><img src="books/{}/{}" /></a>'.format(next_qs, qs['title'], filename))
+
+# page progress
+print('<div id="progress">{} / {} ({:1.2f}%)</div>'.format(page, len(listing), page / len(listing)))
 
 # footer
 print("""</body>
