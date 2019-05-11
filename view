@@ -27,6 +27,7 @@ print("""<!DOCTYPE html>
 print("<title>{}</title>".format(title))
 print("""<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <style>
 #progress {
   position: absolute;

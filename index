@@ -16,6 +16,7 @@ print("""<!DOCTYPE html>
 <title>Intranet Books</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <style>
 img { min-width: 100%; max-width: 100%; height: auto; }
 html { font-size: 1.75em; }
