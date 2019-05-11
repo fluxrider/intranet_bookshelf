@@ -5,7 +5,6 @@ import cgi
 import struct
 
 # parse query string
-#TODO use cgi module instead
 qs = cgi.FieldStorage()
 if 'page' not in qs or 'title' not in qs or 'fit' not in qs:
   print("Error")
@@ -16,10 +15,10 @@ fit = qs['fit'].value
 if fit == 'yes':
   print("fit not supported yet")
   exit(1)
+# TODO use apparmor to confine I/O 
 if not os.path.isdir('books/' + title):
   print("Bad title")
   sys.exit(1)
-
 
 # header
 print("""<!DOCTYPE html>
