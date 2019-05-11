@@ -75,7 +75,7 @@ with open('progress/' + qs['title'], mode='wb') as f:
 print('<a href="view?{}"><img src="books/{}/{}" /></a>'.format(next_qs, qs['title'], filename))
 
 # page progress
-print('<div id="progress">{} / {} ({:1.0f}%)</div>'.format(page, len(listing), page / len(listing) * 100))
+print('<div id="progress">{} / {} ({:1.0f}%)</div>'.format(page, len(listing), (page - 1) / (len(listing) - 1) * 100))
 
 # footer
 print("""</body>

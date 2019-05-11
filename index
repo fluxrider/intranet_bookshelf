@@ -32,8 +32,9 @@ for title in files:
   if os.path.isfile('progress/' + title):
     with open('progress/' + title, mode='rb') as f:
       page = struct.unpack("i", f.read(4))[0]
-      max_page = len(os.listdir('books/' + title))
-      print('<a href="view?page={1}&fit={2}&title={0}">(Resume {3:1.0f}%)</a>'.format(title, page, "no", page / max_page * 100))
+      if page > 1:
+        max_page = len(os.listdir('books/' + title))
+        print('<a href="view?page={1}&fit={2}&title={0}">(Resume {3:1.0f}%)</a>'.format(title, page, "no", (page - 1) / (max_page - 1) * 100))
   print('<br/>')
 
 # footer
