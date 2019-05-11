@@ -13,7 +13,7 @@ def sorted_aphanumeric(data):
 print("""<!DOCTYPE html>
 <html>
 <head>
-<title>Seeds-Lareau Books</title>
+<title>Intranet Books</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -29,12 +29,15 @@ files = sorted_aphanumeric(os.listdir(path))
 for title in files:
   if not os.path.isdir(path + '/' + title): continue
   print('<a href="view?page={1}&fit={2}&title={0}">{0}</a>'.format(title, 1, "no"))
+
+  # resume link
   if os.path.isfile('progress/' + title):
     with open('progress/' + title, mode='rb') as f:
       page = struct.unpack("i", f.read(4))[0]
       if page > 1:
         max_page = len(os.listdir('books/' + title))
         print('<a href="view?page={1}&fit={2}&title={0}">(Resume {3:1.0f}%)</a>'.format(title, page, "no", (page - 1) / (max_page - 1) * 100))
+
   print('<br/>')
 
 # footer
