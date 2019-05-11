@@ -1,0 +1,7 @@
+profile restricted_books {
+  deny network,
+  /home/flux/_/dev/localhost.books/ r,
+  /home/flux/_/dev/localhost.books/** r,
+  /home/flux/_/dev/localhost.books/progress/ rw,
+  /home/flux/_/dev/localhost.books/progress/** rw,
+}

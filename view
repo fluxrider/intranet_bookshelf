@@ -3,6 +3,13 @@ import os
 import sys
 import cgi
 import struct
+import ctypes
+from ctypes import cdll
+apparmor = cdll.LoadLibrary('/usr/lib/libapparmor.so')
+
+if apparmor.aa_change_profile("restricted_books".encode('utf-8')):
+  print("Armor error")
+  sys.exit(1)
 
 # parse query string
 qs = cgi.FieldStorage()
