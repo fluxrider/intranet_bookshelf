@@ -17,7 +17,9 @@ def sorted_aphanumeric(data):
   return sorted(data, key=alphanum_key)
 
 # header
-print("""<!DOCTYPE html>
+print("""Content-Type:text/html;charset=utf-8
+
+<!DOCTYPE html>
 <html>
 <head>
 <title>Intranet Books</title>
@@ -32,21 +34,28 @@ html { font-size: 1.75em; }
 <body>""")
 
 # list of available books
-path = "books"
-files = sorted_aphanumeric(os.listdir(path))
+files = sorted_aphanumeric(os.listdir("books"))
 for title in files:
-  if not os.path.isdir(path + '/' + title): continue
-  print('<a href="view?page={1}&fit={2}&title={0}">{0}</a>'.format(title, 1, "no"))
 
-  # resume link
-  if os.path.isfile('progress/' + title):
-    with open('progress/' + title, mode='rb') as f:
-      page = struct.unpack("i", f.read(4))[0]
-      if page > 1:
-        max_page = len(os.listdir('books/' + title))
-        print('<a href="view?page={1}&fit={2}&title={0}">(Resume {3:1.0f}%)</a>'.format(title, page, "no", (page - 1) / (max_page - 1) * 100))
+  # folder (unzipped cbz)
+  if os.path.isdir('books/' + title):
+    print('<a href="view?page={1}&fit={2}&title={0}">{0}</a>'.format(title, 1, "no"))
 
-  print('<br/>')
+    # resume link
+    if os.path.isfile('progress/' + title):
+      with open('progress/' + title, mode='rb') as f:
+        page = struct.unpack("i", f.read(4))[0]
+        if page > 1:
+          max_page = len(os.listdir('books/' + title))
+          print('<a href="view?page={1}&fit={2}&title={0}">(Resume {3:1.0f}%)</a>'.format(title, page, "no", (page - 1) / (max_page - 1) * 100))
+
+    print('<br/>')
+
+  # epub
+  elif title.endswith(".epub"):
+    print('<a href="{1}">{0}</a>'.format(title, 'books/' + title))
+    print('<a href="export?title={}">(mobi)</a>'.format(title))
+    print('<br/>')
 
 # footer
 print("""</body>
