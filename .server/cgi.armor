@@ -6,4 +6,5 @@ profile restricted_books {
   /home/flux/_/dev/localhost.books/progress/** rw,
   /home/flux/_/dev/localhost.books/tmp/ rw,
   /home/flux/_/dev/localhost.books/tmp/** rw,
+  /usr/bin/ebook-convert Ux,
 }
