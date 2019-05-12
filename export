@@ -36,7 +36,9 @@ p = subprocess.run(
   ["ebook-convert", "books/" + title, filename],
   check=True, capture_output=True)
 
-print("Content-Type: application/x-mobipocket-ebook\n")
+print("Content-Type: application/x-mobipocket-ebook")
+print('Content-Disposition: attachment; filename="' + title.replace('.epub', '.mobi') + '"')
+print()
 sys.stdout.flush()
 with open(filename, "rb") as f: shutil.copyfileobj(f, sys.stdout.buffer)
 os.remove(filename)

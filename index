@@ -54,7 +54,7 @@ for title in files:
   # epub
   elif title.endswith(".epub"):
     print('<a href="{1}">{0}</a>'.format(title, 'books/' + title))
-    print('<a href="export.mobi?title={}">(mobi)</a>'.format(title))
+    print('<a href="export?title={}">(mobi)</a>'.format(title))
     print('<br/>')
 
 # footer
