@@ -36,10 +36,10 @@ html { font-size: 1.75em; }
 <body>""")
 
 # feature top most recent non-empty activity
-featured = []
+featured = 0
 progresses = [(name, os.stat('progress/' + name)) for name in os.listdir('progress')]
 progresses = sorted(progresses, key = lambda x: x[1].st_mtime, reverse = True)
-print('<table width="100%"><tr>')
+print('<table><tr>')
 for p in progresses:
   title = p[0]
   with open('progress/' + title, mode='rb') as f:
@@ -52,12 +52,16 @@ for p in progresses:
       page_index = sample.rfind('_') + 1
       count = sample.rfind('.') - page_index
       filename = ("{}{:0>"+str(count)+"d}.jpg").format(sample[0:page_index], page)
-      print('<td align="center" width="33%"><a href="view?page={1}&fit={2}&title={0}"><img src="books/{0}/{3}" width="100%"/></a></td>'.format(title, page, "no", filename))
-      featured.append((title, (page - 1) / (max_page - 1) * 100))
-      if len(featured) >= 3: break
-print('</tr><tr>')
-for f in featured:
-  print(f'<td align="center">{f[0]} ({f[1]:1.0f}%)</td>')
+      print('''<td style="border: 1px solid black;">
+<table><tr>
+<td align="center"><a href="view?page={1}&fit={2}&title={0}">
+<img src="books/{0}/{3}" height="400"/>
+</a></td></tr>
+<tr><td align="center">{5} ({4:1.0f}%)</td></tr></table></td>
+'''.format(title, page, "no", filename, (page - 1) / (max_page - 1) * 100, title.replace('_', ' ')))
+
+      featured += 1
+      if featured >= 3: break
 print('</tr></table>')
 
 # list of available books
