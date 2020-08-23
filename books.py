@@ -48,7 +48,7 @@ def gen_index(path):
   <link rel="icon" type="image/svg+xml" href="/icon.svg">""")
   print("""
   <style>
-  div.polaroid { display: inline-block; padding-left: 5px; padding-right: 5px; }
+  div.polaroid { display: inline-block; padding: 2px; border-style: solid; border-width: 1px; margin: 2px; }
   div.container { text-align: center; }
   img {
     border-radius: 5%;
@@ -85,8 +85,16 @@ def gen_index(path):
   for filename in sorted(os.listdir(path)):
     filename_safe = urllib.parse.quote_plus(filename)
     path_safe = urllib.parse.quote_plus(path)
+    img = ''
+    if mode == 'img':
+      img_src = get_first_img_src(path, filename)
+      if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
     if filename.endswith('.epub') or filename.endswith('.mobi'):
-      print(f'<a href="{path}/{filename}">{filename}</a><br/>')
+      if mode == 'img':
+        print(f"""<div class="polaroid"><a href="{path}/{filename}">{img}</a>
+        <div class="container"><a href="{path}/{filename}">{filename}</a></div></div>""")
+      else:
+        print(f'<a href="{path}/{filename}">{filename}</a><br/>')
     else:
       # progress
       progress, total, percent = read_progress(f'{progress_path}/{filename}')
@@ -95,12 +103,11 @@ def gen_index(path):
       else:
         progress = '&nbsp;'
       # thumbnail
-      img = ''
       if mode == 'img':
-        img_src = get_first_img_src(path, filename)
-        if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
         # final link
-        print(f'<div class="polaroid"><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{img}</a><div class="container"><p><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a></p><p>{progress}</p></div></div>')
+        print(f"""<div class="polaroid"><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{img}</a>
+        <div class="container"><p><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a></p>
+        <p>{progress}</p></div></div>""")
       else:
         print(f'<a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a>&nbsp;{progress}<br/>')
   print("""
@@ -191,6 +198,8 @@ def get_first_img_src(path, filename):
           path = urllib.parse.quote_plus(path)
           name = urllib.parse.quote_plus(name)
           return f'?user={user}&raw=1&p={path}|{name}'
+  elif path.endswith('.epub') or path.endswith('.mobi'):
+    return f'?user={user}&p={path}'
   else:
     return "404.jpg"
 
