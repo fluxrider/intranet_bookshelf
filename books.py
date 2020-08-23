@@ -70,16 +70,7 @@ def gen_index(path):
     for p in progresses:
       title = p[0]
       for root, dirs, files in os.walk(path): 
-        for file in files: 
-          if file == title:
-            progress, total, percent = read_progress(p[2])
-            if progress > 0:
-              root_safe = urllib.parse.quote_plus(root)
-              title_safe = urllib.parse.quote_plus(title)
-              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {title} {percent:.2f}</a><br/>')
-              count += 1
-              break
-        for file in dirs: 
+        for file in files + dirs: 
           if file == title:
             progress, total, percent = read_progress(p[2])
             if progress > 0:
@@ -237,6 +228,9 @@ def handle_file(path):
             print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
             shutil.copyfileobj(f, sys.stdout.buffer)
             return 1
+  # epub/mobi thumbnailer
+  elif path.endswith('.epub') or path.endswith('.mobi'):
+    exit(4)
   raise Exception(f'unexpected path: {path}')
 
 handle_file(path)
