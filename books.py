@@ -76,7 +76,7 @@ def gen_index(path):
             if progress > 0:
               root_safe = urllib.parse.quote_plus(root)
               title_safe = urllib.parse.quote_plus(title)
-              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {root}/{title} {percent:.2f}</a><br/>')
+              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {title} {percent:.2f}</a><br/>')
               count += 1
               break
         for file in dirs: 
@@ -85,7 +85,7 @@ def gen_index(path):
             if progress > 0:
               root_safe = urllib.parse.quote_plus(root)
               title_safe = urllib.parse.quote_plus(title)
-              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {root}/{title} {percent:.2f}</a><br/>')
+              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {title} {percent:.2f}</a><br/>')
               count += 1
               break
         if count == 3: break
@@ -109,9 +109,9 @@ def gen_index(path):
         img_src = get_first_img_src(path, filename)
         if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
         # final link
-        print(f'<div class="polaroid"><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{img}</a><div class="container"><p><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename}</a></p><p>{progress}</p></div></div>')
+        print(f'<div class="polaroid"><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{img}</a><div class="container"><p><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a></p><p>{progress}</p></div></div>')
       else:
-        print(f'<a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename}</a>&nbsp;{progress}<br/>')
+        print(f'<a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a>&nbsp;{progress}<br/>')
   print("""
   </body>
   </html>
@@ -126,7 +126,7 @@ def gen_page(parts):
   on_next = False
   if len(parts) == 1:
     for filename in sorted(os.listdir(os.path.dirname(parts[0]))):
-      if filename.endswith('.jpg'):
+      if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
         if on_next: next_page = f'{os.path.dirname(parts[0])}/{filename}'
         on_next = parts[0].endswith(f'/{filename}')
         if on_next: current = n
@@ -135,7 +135,7 @@ def gen_page(parts):
   else:
     with zipfile.ZipFile(parts[0]) as cbz:
       for name in sorted(cbz.namelist()):
-        if name.endswith('.jpg'):
+        if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           if on_next: next_page = name
           on_next = name == parts[1]
           if on_next: current = n
@@ -186,7 +186,7 @@ def get_first_img_src(path, filename):
   if os.path.isdir(path):
     filenames = sorted(os.listdir(path))
     for filename in filenames:
-      if filename.endswith('.jpg'):
+      if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
         path = urllib.parse.quote_plus(path)
         filename = urllib.parse.quote_plus(filename)
         return f'{path}/{filename}'
@@ -196,7 +196,7 @@ def get_first_img_src(path, filename):
   elif path.endswith('.cbz'):
     with zipfile.ZipFile(path) as cbz:
       for name in sorted(cbz.namelist()):
-        if name.endswith('.jpg'):
+        if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           path = urllib.parse.quote_plus(path)
           name = urllib.parse.quote_plus(name)
           return f'?user={user}&raw=1&p={path}|{name}'
@@ -209,7 +209,7 @@ def handle_file(path):
     # handle first jpg (or page specified)
     count = 0
     for filename in sorted(os.listdir(path)):
-      if filename.endswith('.jpg'):
+      if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
         if count == page: return handle_file(f'{path}/{filename}')
         count += 1
     # show index
@@ -220,11 +220,11 @@ def handle_file(path):
       # handle first jpg (or page specified)
       count = 0
       for name in sorted(cbz.namelist()):
-        if name.endswith('.jpg'):
+        if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           if count == page: return handle_file(f'{path}|{name}')
           count += 1
   # comic page (as file or inside a zip)
-  elif path.endswith('.jpg'):
+  elif path.lower().endswith('.jpg') or path.lower().endswith('.jpeg'):
     parts = path.split('|')
     if not raw:
       return gen_page(parts)
