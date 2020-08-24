@@ -8,6 +8,7 @@ import cgi
 import urllib.parse
 import shutil
 import random
+import subprocess
 
 # options
 path = 'books'
@@ -199,6 +200,7 @@ def get_first_img_src(path, filename):
           name = urllib.parse.quote_plus(name)
           return f'?user={user}&raw=1&p={path}|{name}'
   elif path.endswith('.epub') or path.endswith('.mobi'):
+    path = urllib.parse.quote_plus(path)
     return f'?user={user}&p={path}'
   else:
     return "404.jpg"
@@ -238,8 +240,21 @@ def handle_file(path):
             shutil.copyfileobj(f, sys.stdout.buffer)
             return 1
   # epub/mobi thumbnailer
-  elif path.endswith('.epub') or path.endswith('.mobi'):
-    exit(4)
+  elif path.endswith('.epub'):
+    completedProc = subprocess.run(['gnome-epub-thumbnailer', '-s', '150', path, 'tmp.png'])
+    if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
+    with open('tmp.png', mode='rb') as f:
+      print('Content-Type:image/png\r\n\r\n', end='', flush=True)
+      shutil.copyfileobj(f, sys.stdout.buffer)
+      return 1
+  elif path.endswith('.mobi'):
+    completedProc = subprocess.run(['gnome-mobi-thumbnailer', '-s', '150', path, 'tmp.png'])
+    if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
+    with open('tmp.png', mode='rb') as f:
+      print('Content-Type:image/png\r\n\r\n', end='', flush=True)
+      shutil.copyfileobj(f, sys.stdout.buffer)
+      return 1
+  
   raise Exception(f'unexpected path: {path}')
 
 handle_file(path)
