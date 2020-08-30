@@ -22,6 +22,7 @@ def read_progress(path):
   total = 0
   if os.path.isfile(path):
     with open(path, mode='rb') as f:
+      # format is { int progress; int total; } but I use to only store progress so I'm mindfull of that
       progress = struct.unpack("i", f.read(4))[0]
       more = f.read(4)
       if len(more) == 4: total = struct.unpack("i", more)[0]
