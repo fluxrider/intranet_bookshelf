@@ -52,22 +52,21 @@ def gen_index(path):
   </style>
   </head><body>
   """)
-  # if root, list recent
+  # if root index, list the 3 most recent activity that aren't at page 0
   if path == 'books':
-    # todo only progress that are greater than 1
     progresses = [(name, os.stat(f'{progress_path}/{name}'), f'{progress_path}/{name}') for name in os.listdir(progress_path)]
     progresses = sorted(progresses, key = lambda x: x[1].st_mtime, reverse = True)
     count = 0
     for p in progresses:
       title = p[0]
+      # I only get the title, not the path, when dealing with progress files, so I need to search
+      # (this allows organizing books without breaking their progress)
       for root, dirs, files in os.walk(path): 
         for file in files + dirs: 
           if file == title:
             progress, total, percent = read_progress(p[2])
             if progress > 0:
-              root_safe = urllib.parse.quote_plus(root)
-              title_safe = urllib.parse.quote_plus(title)
-              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={root_safe}/{title_safe}">Recent: {title} {percent:.2f}</a><br/>')
+              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={urllib.parse.quote_plus(root)}/{urllib.parse.quote_plus(title)}">Recent: {title} {percent:.2f}</a><br/>')
               count += 1
               break
         if count == 3: break
