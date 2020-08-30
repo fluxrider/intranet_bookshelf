@@ -17,6 +17,8 @@ if 'user' in qs and qs['user'].value.isalpha():
 if not progress_path or not os.path.isdir(progress_path):
   exit(4)
 
+query = f'user={user}&mode={mode}'
+
 def read_progress(path):
   progress = 0
   total = 0
@@ -66,7 +68,7 @@ def gen_index(path):
           if file == title:
             progress, total, percent = read_progress(p[2])
             if progress > 0:
-              print(f'<a href="?user={user}&mode={mode}&page={progress}&p={urllib.parse.quote_plus(root)}/{urllib.parse.quote_plus(title)}">Recent: {title} {percent:.2f}</a><br/>')
+              print(f'<a href="?{query}&page={progress}&p={urllib.parse.quote_plus(root)}/{urllib.parse.quote_plus(title)}">Recent: {title} {percent:.2f}</a><br/>')
               count += 1
               break
         if count == 3: break
@@ -89,17 +91,17 @@ def gen_index(path):
       # progress
       progress, total, percent = read_progress(f'{progress_path}/{filename}')
       if progress > 0:
-        progress = f'<a href="?user={user}&mode={mode}&page={progress}&p={path_safe}/{filename_safe}">(resume {percent:.2f})</a>'
+        progress = f'<a href="?{query}&page={progress}&p={path_safe}/{filename_safe}">(resume {percent:.2f})</a>'
       else:
         progress = '&nbsp;'
       # thumbnail
       if mode == 'img':
         # final link
-        print(f"""<div class="polaroid"><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{img}</a>
-        <div class="container"><p><a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a></p>
+        print(f"""<div class="polaroid"><a href="?{query}&p={path_safe}/{filename_safe}">{img}</a>
+        <div class="container"><p><a href="?{query}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a></p>
         <p>{progress}</p></div></div>""")
       else:
-        print(f'<a href="?user={user}&mode={mode}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a>&nbsp;{progress}<br/>')
+        print(f'<a href="?{query}&p={path_safe}/{filename_safe}">{filename.replace("_", " ")}</a>&nbsp;{progress}<br/>')
   print("""
   </body>
   </html>
@@ -158,14 +160,14 @@ def gen_page(parts):
   # show current page (with link to next page)
   if len(parts) == 1:
     if not next_page: next_page = 'books'
-    print(f'<a href="?user={user}&mode={mode}&p={next_page}"><img src="{parts[0]}" /></a>')
-    if previous_page: print(f'<a href="?user={user}&mode={mode}&p={previous_page}">back</a>')
+    print(f'<a href="?{query}&p={next_page}"><img src="{parts[0]}" /></a>')
+    if previous_page: print(f'<a href="?{query}&p={previous_page}">back</a>')
   else:
     if not next_page:
-      print(f'<a href="?user={user}&mode={mode}&p=books"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
+      print(f'<a href="?{query}&p=books"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
     else:
-      print(f'<a href="?user={user}&mode={mode}&p={parts[0]}|{next_page}"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
-    if previous_page: print(f'<a href="?user={user}&mode={mode}&p={parts[0]}|{previous_page}">back</a>')
+      print(f'<a href="?{query}&p={parts[0]}|{next_page}"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
+    if previous_page: print(f'<a href="?{query}&p={parts[0]}|{previous_page}">back</a>')
   print("""</body></html>""")
 
 def get_first_img_src(path, filename):
