@@ -1,32 +1,20 @@
 #!/usr/bin/python3
-import re
-import os
-import sys
-import zipfile
-import struct
-import cgi
-import urllib.parse
-import shutil
-import random
-import subprocess
-import tempfile
+import os, sys, re, struct, subprocess, random, tempfile, zipfile, shutil
+import cgi, urllib.parse
 
 # options
-path = 'books'
-page = 0
-mode = 'text'
-raw = False
 qs = cgi.FieldStorage()
+path = urllib.parse.unquote_plus(qs['p'].value) if 'p' in qs else 'books'
+page = int(qs['page'].value) if 'page' in qs and qs['page'].value.isdigit() else 0
+mode = qs['mode'].value if 'mode' in qs else 'text'
+raw = 'raw' in qs and qs['raw'].value != 0
+
+# 404 if no valid user specified
 progress_path = None
-if 'p' in qs: path = urllib.parse.unquote_plus(qs['p'].value)
-if 'page' in qs and qs['page'].value.isdigit(): page = int(qs['page'].value)
-if 'mode' in qs: mode = qs['mode'].value
-if 'raw' in qs: raw = qs['raw'].value != 0
 if 'user' in qs and qs['user'].value.isalpha():
   user = qs['user'].value
   progress_path = 'progress_' + user
 if not progress_path or not os.path.isdir(progress_path):
-  # 404 if no valid user specified
   exit(4)
 
 def read_progress(path):
