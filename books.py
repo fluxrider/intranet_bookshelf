@@ -232,10 +232,8 @@ def handle_file(path):
     # generate a thumbnail
     elif raw == 2:
       if len(parts) == 1:
-        with open(parts[0], mode='rb') as f:
-          print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-          shutil.copyfileobj(f, sys.stdout.buffer)
-          return 0
+        print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
+        os.execv('/usr/bin/magick', ['magick', 'convert', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'])
       else:
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
