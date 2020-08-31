@@ -238,7 +238,7 @@ def handle_file(path):
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
             print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-            shutil.copyfileobj(f, sys.stdout.buffer)
+            subprocess.run(['magick', 'convert', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'], check=True, input=f.read())
             return 0
   # epub/mobi thumbnailer
   elif path.endswith('.epub') or path.endswith('.mobi'):
