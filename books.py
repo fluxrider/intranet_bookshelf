@@ -7,7 +7,8 @@ qs = cgi.FieldStorage()
 path = urllib.parse.unquote_plus(qs['p'].value) if 'p' in qs else 'books'
 page = int(qs['page'].value) if 'page' in qs and qs['page'].value.isdigit() else 0
 mode = qs['mode'].value if 'mode' in qs else 'text'
-raw = 'raw' in qs and qs['raw'].value != 0
+raw = int(qs['raw'].value) if 'raw' in qs else 0
+thumbnail_height = '150'
 
 # 404 if no valid user specified
 progress_path = None
@@ -177,9 +178,7 @@ def get_first_img_src(path, filename):
     filenames = sorted(os.listdir(path))
     for filename in filenames:
       if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
-        path = urllib.parse.quote_plus(path)
-        filename = urllib.parse.quote_plus(filename)
-        return f'{path}/{filename}'
+        return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}/{urllib.parse.quote_plus(filename)}'
     # if category folder, randomly select an entry
     return get_first_img_src(path, random.choice(filenames))
   # zipped comic
@@ -187,9 +186,7 @@ def get_first_img_src(path, filename):
     with zipfile.ZipFile(path) as cbz:
       for name in sorted(cbz.namelist()):
         if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
-          path = urllib.parse.quote_plus(path)
-          name = urllib.parse.quote_plus(name)
-          return f'?user={user}&raw=1&p={path}|{name}'
+          return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}|{urllib.parse.quote_plus(name)}'
   elif path.endswith('.epub') or path.endswith('.mobi'):
     path = urllib.parse.quote_plus(path)
     return f'?user={user}&p={path}'
@@ -216,14 +213,29 @@ def handle_file(path):
         if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           if count == page: return handle_file(f'{path}|{name}')
           count += 1
-  # comic page (as file or inside a zip)
+  # comic page (as file or inside a zip) (thumbnails or full size)
   elif path.lower().endswith('.jpg') or path.lower().endswith('.jpeg'):
     parts = path.split('|')
-    if not raw:
+    # render the html page
+    if raw == 0:
       return gen_page(parts)
-    else:
+    # render the full size image
+    elif raw == 1:
       if len(parts) == 1:
         raise Exception("webserver should serve static files where it can, not this script")
+      else:
+        with zipfile.ZipFile(parts[0]) as cbz:
+          with cbz.open(parts[1]) as f:
+            print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
+            shutil.copyfileobj(f, sys.stdout.buffer)
+            return 0
+    # generate a thumbnail
+    elif raw == 2:
+      if len(parts) == 1:
+        with open(parts[0], mode='rb') as f:
+          print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
+          shutil.copyfileobj(f, sys.stdout.buffer)
+          return 0
       else:
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
@@ -234,7 +246,7 @@ def handle_file(path):
   elif path.endswith('.epub') or path.endswith('.mobi'):
     fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
     os.close(fd)
-    completedProc = subprocess.run([f'gnome-{path[-4:]}-thumbnailer', '-s', '150', path, tmp_path])
+    completedProc = subprocess.run([f'gnome-{path[-4:]}-thumbnailer', '-s', thumbnail_height, path, tmp_path])
     if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
     with open(tmp_path, mode='rb') as f:
       print('Content-Type:image/png\r\n\r\n', end='', flush=True)
