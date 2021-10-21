@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+# naws intranet_bookshelf 8888
+# http://localhost:8888/books.py?user=papa&mode=img&th=450
 import os, sys, re, struct, subprocess, random, tempfile, zipfile, shutil
 import cgi, urllib.parse
 
@@ -8,7 +10,7 @@ path = urllib.parse.unquote_plus(qs['p'].value) if 'p' in qs else 'books'
 page = int(qs['page'].value) if 'page' in qs and qs['page'].value.isdigit() else 0
 mode = qs['mode'].value if 'mode' in qs else 'text'
 raw = int(qs['raw'].value) if 'raw' in qs else 0
-thumbnail_height = '150'
+thumbnail_height = qs['th'].value if 'th' in qs else '150'
 
 # 404 if no valid user specified
 progress_path = None
@@ -18,7 +20,7 @@ if 'user' in qs and qs['user'].value.isalpha():
 if not progress_path or not os.path.isdir(progress_path):
   exit(4)
 
-query = f'user={user}&mode={mode}'
+query = f'user={user}&mode={mode}&th={thumbnail_height}'
 
 def read_progress(path):
   progress = 0
@@ -40,18 +42,18 @@ def gen_index(path):
   <title>{path}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/icon.svg">""")
-  print("""
+  print(f"""
   <style>
-  div.polaroid { display: inline-block; padding: 2px; border-style: solid; border-width: 1px; margin: 2px; }
-  div.container { text-align: center; }
-  img {
+  div.polaroid {{ display: inline-block; padding: 2px; border-style: solid; border-width: 1px; margin: 2px; }}
+  div.container {{ text-align: center; }}
+  img {{
     border-radius: 5%;
-    max-height: 150px;
-    min-height: 150px;
+    max-height: {thumbnail_height}px;
+    min-height: {thumbnail_height}px;
     margin-left: auto;
     margin-right: auto;
     display: block;
-  }
+  }}
   </style>
   </head><body>
   """)
@@ -178,7 +180,7 @@ def get_first_img_src(path, filename):
     filenames = sorted(os.listdir(path))
     for filename in filenames:
       if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
-        return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}/{urllib.parse.quote_plus(filename)}'
+        return f'?user={user}&raw=2&th={thumbnail_height}&p={urllib.parse.quote_plus(path)}/{urllib.parse.quote_plus(filename)}'
     # if category folder, randomly select an entry
     return get_first_img_src(path, random.choice(filenames))
   # zipped comic
@@ -186,7 +188,7 @@ def get_first_img_src(path, filename):
     with zipfile.ZipFile(path) as cbz:
       for name in sorted(cbz.namelist()):
         if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
-          return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}|{urllib.parse.quote_plus(name)}'
+          return f'?user={user}&raw=2&th={thumbnail_height}&p={urllib.parse.quote_plus(path)}|{urllib.parse.quote_plus(name)}'
   elif path.endswith('.epub') or path.endswith('.mobi'):
     path = urllib.parse.quote_plus(path)
     return f'?user={user}&p={path}'

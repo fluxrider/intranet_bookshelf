@@ -10,6 +10,13 @@ Raison D'être: I routinely buy comic books from humblebundle.com, and want to r
 * Supports organizing books in a folder hierarchy.
 * Supports per user progress tracking.
 
+# Usage
+
+* create a books folder, dump cbz in it
+* create a progress_myusername folder
+* start a webserver: ./naws ../intranet_bookshelf/ 8888
+* visit the site: localhost:8888/books.py?user=myusername&mode=img
+
 # Backburner (a.k.a. won't do [probably])
 
 * Convert on the fly epub / mobi from one another.
