@@ -2,21 +2,25 @@
 # naws intranet_bookshelf 8888
 # http://localhost:8888/books.py?user=papa&mode=img&th=450
 import os, sys, re, struct, subprocess, random, tempfile, zipfile, shutil
-import cgi, urllib.parse
+import urllib.parse
 
-# options
-qs = cgi.FieldStorage()
-path = urllib.parse.unquote_plus(qs['p'].value) if 'p' in qs else 'books'
-page = int(qs['page'].value) if 'page' in qs and qs['page'].value.isdigit() else 0
-mode = qs['mode'].value if 'mode' in qs else 'text'
-raw = int(qs['raw'].value) if 'raw' in qs else 0
-thumbnail_height = qs['th'].value if 'th' in qs else '150'
-
+# NOTE: cgi is deprecated and suppose to be removed soon. What great philosophy. Could you imagine C removing a standard lib?
+# solution #1 some dude just copied the library, no code required: pip install legacy-cgi (https://github.com/jackrosenthal/legacy-cgi/blob/main/cgi.py)
+# solution #2 read the code of FieldStorage's constructor. I think it's os.environ['QUERY_STRING'] and use urllib.parse.parse_qsl(), very error prone of course
+# I'm going with option #2.
+# cgi.FieldStorage() DIY workaround
+qs = urllib.parse.parse_qs(os.environ['QUERY_STRING']) # sadly, this returns a dictionary of lists
+path = urllib.parse.unquote_plus(qs['p'][0]) if 'p' in qs else 'books'
+page = int(qs['page'][0]) if 'page' in qs and qs['page'][0].isdigit() else 0
+mode = qs['mode'][0] if 'mode' in qs else 'text'
+raw = int(qs['raw'][0]) if 'raw' in qs else 0
+thumbnail_height = qs['th'][0] if 'th' in qs else '150'
 # 404 if no valid user specified
 progress_path = None
-if 'user' in qs and qs['user'].value.isalpha():
-  user = qs['user'].value
+if 'user' in qs and qs['user'][0].isalpha():
+  user = qs['user'][0]
   progress_path = 'progress_' + user
+
 if not progress_path or not os.path.isdir(progress_path):
   exit(4)
 
@@ -235,12 +239,12 @@ def handle_file(path):
     elif raw == 2:
       if len(parts) == 1:
         print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-        os.execv('/usr/bin/magick', ['magick', 'convert', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'])
+        os.execv('/usr/bin/magick', ['magick', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'])
       else:
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
             print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-            subprocess.run(['magick', 'convert', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'], check=True, input=f.read())
+            subprocess.run(['magick', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'], check=True, input=f.read())
             return 0
   # epub/mobi thumbnailer
   elif path.endswith('.epub') or path.endswith('.mobi'):
