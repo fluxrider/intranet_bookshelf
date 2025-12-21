@@ -88,7 +88,7 @@ def gen_index(path):
     if mode == 'img':
       img_src = get_first_img_src(path, filename)
       if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
-    if filename.endswith('.epub') or filename.endswith('.mobi') or filename.endswith('.pdf'):
+    if filename.endswith('.epub') or filename.endswith('.mobi') or filename.endswith('.pdf') or filename.endswith('.mp3'):
       if mode == 'img':
         print(f"""<div class="polaroid"><a href="{path}/{filename}">{img}</a>
         <div class="container"><a href="{path}/{filename}">{filename}</a></div></div>""")
