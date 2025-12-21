@@ -140,6 +140,7 @@ def gen_page(parts):
           if not on_next and not next_page: previous_page = name
           n += 1
   # save progress
+  parent = os.path.dirname(parts[0])
   title = os.path.split(parts[0] if len(parts) > 1 else os.path.dirname(parts[0]))[1]
   with open(f'{progress_path}/{title}', mode='wb') as f:
     f.write(struct.pack('ii', current, n))
@@ -167,15 +168,16 @@ def gen_page(parts):
   if previous_page: previous_page = urllib.parse.quote_plus(previous_page)
   # show current page (with link to next page)
   if len(parts) == 1:
-    if not next_page: next_page = 'books'
+    if not next_page: next_page = parent
     print(f'<a href="?{query}&p={next_page}"><img src="{parts[0]}" /></a>')
     if previous_page: print(f'<a href="?{query}&p={previous_page}">back</a>')
   else:
     if not next_page:
-      print(f'<a href="?{query}&p=books"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
+      print(f'<a href="?{query}&p={parent}"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
     else:
       print(f'<a href="?{query}&p={parts[0]}|{next_page}"><img src="?user={user}&raw=1&p={parts[0]}|{parts[1]}" /></a>')
     if previous_page: print(f'<a href="?{query}&p={parts[0]}|{previous_page}">back</a>')
+  print(f'<a href="?{query}&p={parent}">parent</a>')
   print("""</body></html>""")
 
 def get_first_img_src(path, filename):
