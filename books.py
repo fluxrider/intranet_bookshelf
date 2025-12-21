@@ -37,6 +37,20 @@ def read_progress(path):
       if len(more) == 4: total = struct.unpack("i", more)[0]
   return (progress, total, progress/(total-1) if total > 1 else 0)
 
+def cache_filename_safe(path):
+  keepcharacters = (' ','.','_')
+  return "".join(c for c in path if c.isalnum() or c in keepcharacters).rstrip()
+
+def use_cache_if_possible(img_src):
+  qs = urllib.parse.parse_qs(img_src)
+  if 'p' in qs:
+    path = cache_filename_safe(qs['p'][0])
+    cache_path = f'cache/{thumbnail_height}/{path}.jpg'
+    if os.path.isfile(cache_path): return cache_path
+    cache_path = f'cache/{thumbnail_height}/{path}.png'
+    if os.path.isfile(cache_path): return cache_path
+  return img_src
+
 def gen_index(path):
   print(f"""Content-Type:text/html;charset=utf-8\r\n\r\n
   <!DOCTYPE html>
@@ -86,7 +100,7 @@ def gen_index(path):
     path_safe = urllib.parse.quote_plus(path)
     img = ''
     if mode == 'img':
-      img_src = get_first_img_src(path, filename)
+      img_src = use_cache_if_possible(get_first_img_src(path, filename))
       if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
     if filename.endswith('.epub') or filename.endswith('.mobi') or filename.endswith('.pdf') or filename.endswith('.mp3'):
       if mode == 'img':
@@ -251,7 +265,10 @@ def handle_file(path):
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
             print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-            subprocess.run(['magick', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'], check=True, input=f.read())
+            #subprocess.run(['magick', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'], check=True, input=f.read())
+            subprocess.run(['magick', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg'], check=True, input=f.read())
+            with open(f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg', mode='rb') as f2:
+              shutil.copyfileobj(f2, sys.stdout.buffer)
             return 0
   # epub/mobi thumbnailer
   elif path.endswith('.epub') or path.endswith('.mobi'):
@@ -262,7 +279,7 @@ def handle_file(path):
     with open(tmp_path, mode='rb') as f:
       print('Content-Type:image/png\r\n\r\n', end='', flush=True)
       shutil.copyfileobj(f, sys.stdout.buffer)
-    os.remove(tmp_path)
+    shutil.move(tmp_path, f'cache/{thumbnail_height}/{cache_filename_safe(path)}.png') #os.remove(tmp_path)
     return 0
   # pdf thumbnailer
   elif path.endswith('.pdf'):
@@ -274,7 +291,7 @@ def handle_file(path):
     with open(tmp_path, mode='rb') as f:
       print('Content-Type:image/png\r\n\r\n', end='', flush=True)
       shutil.copyfileobj(f, sys.stdout.buffer)
-    os.remove(tmp_path)
+    shutil.move(tmp_path, f'cache/{thumbnail_height}/{cache_filename_safe(path)}.png') #os.remove(tmp_path)
     return 0
 
   raise Exception(f'unexpected path: {path}')
