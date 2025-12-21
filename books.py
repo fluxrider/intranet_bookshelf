@@ -122,13 +122,14 @@ def gen_page(parts):
   previous_page = None
   on_next = False
   if len(parts) == 1:
-    for filename in sorted(os.listdir(os.path.dirname(parts[0]))):
-      if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
-        if on_next: next_page = f'{os.path.dirname(parts[0])}/{filename}'
-        on_next = parts[0].endswith(f'/{filename}')
-        if on_next: current = n
-        if not on_next and not next_page: previous_page = f'{os.path.dirname(parts[0])}/{filename}'
-        n += 1
+    pass # dropping support for extracted cbz in favor of serving jpeg normally
+    #for filename in sorted(os.listdir(os.path.dirname(parts[0]))):
+    #  if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
+    #    if on_next: next_page = f'{os.path.dirname(parts[0])}/{filename}'
+    #    on_next = parts[0].endswith(f'/{filename}')
+    #    if on_next: current = n
+    #    if not on_next and not next_page: previous_page = f'{os.path.dirname(parts[0])}/{filename}'
+    #    n += 1
   else:
     with zipfile.ZipFile(parts[0]) as cbz:
       for name in sorted(cbz.namelist()):
@@ -197,7 +198,7 @@ def get_first_img_src(path, filename):
     return f'?user={user}&naws-allow-stderr&p={urllib.parse.quote_plus(path)}'
   elif path.endswith('.epub') or path.endswith('.mobi'):
     return f'?user={user}&p={urllib.parse.quote_plus(path)}'
-  elif path.endswith('.png'):
+  elif path.endswith('.png') or path.endswith('.jpg') or path.endswith('.jpeg'):
     return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}'
   else:
     return "404.jpg"
@@ -207,10 +208,11 @@ def handle_file(path):
   if os.path.isdir(path):
     # handle first jpg (or page specified)
     count = 0
-    for filename in sorted(os.listdir(path)):
-      if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
-        if count == page: return handle_file(f'{path}/{filename}')
-        count += 1
+    # dropping support for extracted cbz in favor of serving jpeg normally
+    #for filename in sorted(os.listdir(path)):
+    #  if filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
+    #    if count == page: return handle_file(f'{path}/{filename}')
+    #    count += 1
     # show index
     return gen_index(path)
   # zipped comic
