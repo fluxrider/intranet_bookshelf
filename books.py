@@ -193,9 +193,10 @@ def get_first_img_src(path, filename):
       for name in sorted(cbz.namelist()):
         if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           return f'?user={user}&raw=2&th={thumbnail_height}&p={urllib.parse.quote_plus(path)}|{urllib.parse.quote_plus(name)}'
-  elif path.endswith('.epub') or path.endswith('.mobi') or path.endswith('.pdf'):
-    path = urllib.parse.quote_plus(path)
-    return f'?user={user}&p={path}'
+  elif path.endswith('.pdf'):
+    return f'?user={user}&naws-allow-stderr&p={urllib.parse.quote_plus(path)}'
+  elif path.endswith('.epub') or path.endswith('.mobi'):
+    return f'?user={user}&p={urllib.parse.quote_plus(path)}'
   elif path.endswith('.png'):
     return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}'
   else:
@@ -263,6 +264,7 @@ def handle_file(path):
   elif path.endswith('.pdf'):
     fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
     os.close(fd)
+    # note: image magick doesn't fully quiet it's stderr output because some under the hood libraries openjpeg use prints... so I do a special query string with 'naws-allow-stderr' to tell the server to ignore stderr
     completedProc = subprocess.run(['magick', f'{path}[0]', '-quiet', '-resize', f'x{thumbnail_height}', tmp_path])
     if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
     with open(tmp_path, mode='rb') as f:
