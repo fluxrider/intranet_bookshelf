@@ -88,7 +88,7 @@ def gen_index(path):
     if mode == 'img':
       img_src = get_first_img_src(path, filename)
       if img_src != '404.jpg': img = f'<img src="{img_src}"/>'
-    if filename.endswith('.epub') or filename.endswith('.mobi'):
+    if filename.endswith('.epub') or filename.endswith('.mobi') or filename.endswith('.pdf'):
       if mode == 'img':
         print(f"""<div class="polaroid"><a href="{path}/{filename}">{img}</a>
         <div class="container"><a href="{path}/{filename}">{filename}</a></div></div>""")
@@ -193,7 +193,7 @@ def get_first_img_src(path, filename):
       for name in sorted(cbz.namelist()):
         if name.lower().endswith('.jpg') or name.lower().endswith('.jpeg'):
           return f'?user={user}&raw=2&th={thumbnail_height}&p={urllib.parse.quote_plus(path)}|{urllib.parse.quote_plus(name)}'
-  elif path.endswith('.epub') or path.endswith('.mobi'):
+  elif path.endswith('.epub') or path.endswith('.mobi') or path.endswith('.pdf'):
     path = urllib.parse.quote_plus(path)
     return f'?user={user}&p={path}'
   else:
@@ -251,6 +251,17 @@ def handle_file(path):
     fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
     os.close(fd)
     completedProc = subprocess.run([f'gnome-{path[-4:]}-thumbnailer', '-s', thumbnail_height, path, tmp_path])
+    if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
+    with open(tmp_path, mode='rb') as f:
+      print('Content-Type:image/png\r\n\r\n', end='', flush=True)
+      shutil.copyfileobj(f, sys.stdout.buffer)
+    os.remove(tmp_path)
+    return 0
+  # pdf thumbnailer
+  elif path.endswith('.pdf'):
+    fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
+    os.close(fd)
+    completedProc = subprocess.run(['magick', f'{path}[0]', '-resize', f'x{thumbnail_height}', tmp_path])
     if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
     with open(tmp_path, mode='rb') as f:
       print('Content-Type:image/png\r\n\r\n', end='', flush=True)
