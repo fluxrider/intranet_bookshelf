@@ -260,7 +260,10 @@ def handle_file(path):
     elif raw == 2:
       if len(parts) == 1:
         print('Content-Type:image/jpeg\r\n\r\n', end='', flush=True)
-        os.execv('/usr/bin/magick', ['magick', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'])
+        #os.execv('/usr/bin/magick', ['magick', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', 'jpeg:-'])
+        subprocess.run(['magick', parts[0], '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg'], check=True)
+        with open(f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg', mode='rb') as f2:
+          shutil.copyfileobj(f2, sys.stdout.buffer)
       else:
         with zipfile.ZipFile(parts[0]) as cbz:
           with cbz.open(parts[1]) as f:
@@ -269,7 +272,7 @@ def handle_file(path):
             subprocess.run(['magick', '-', '-thumbnail', f'x{thumbnail_height}>', '-quality', '75', f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg'], check=True, input=f.read())
             with open(f'cache/{thumbnail_height}/{cache_filename_safe(path)}.jpg', mode='rb') as f2:
               shutil.copyfileobj(f2, sys.stdout.buffer)
-            return 0
+      return 0
   # epub/mobi thumbnailer
   elif path.endswith('.epub') or path.endswith('.mobi'):
     fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
