@@ -261,7 +261,7 @@ def handle_file(path):
   elif path.endswith('.pdf'):
     fd, tmp_path = tempfile.mkstemp(suffix='.png', prefix='tmp')
     os.close(fd)
-    completedProc = subprocess.run(['magick', f'{path}[0]', '-resize', f'x{thumbnail_height}', tmp_path])
+    completedProc = subprocess.run(['magick', f'{path}[0]', '-quiet', '-resize', f'x{thumbnail_height}', tmp_path])
     if completedProc.returncode != 0: raise Exception(f'failed to thumbnail {path}')
     with open(tmp_path, mode='rb') as f:
       print('Content-Type:image/png\r\n\r\n', end='', flush=True)
