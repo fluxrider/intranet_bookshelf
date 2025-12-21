@@ -196,6 +196,8 @@ def get_first_img_src(path, filename):
   elif path.endswith('.epub') or path.endswith('.mobi') or path.endswith('.pdf'):
     path = urllib.parse.quote_plus(path)
     return f'?user={user}&p={path}'
+  elif path.endswith('.png'):
+    return f'?user={user}&raw=2&p={urllib.parse.quote_plus(path)}'
   else:
     return "404.jpg"
 
@@ -220,7 +222,7 @@ def handle_file(path):
           if count == page: return handle_file(f'{path}|{name}')
           count += 1
   # comic page (as file or inside a zip) (thumbnails or full size)
-  elif path.lower().endswith('.jpg') or path.lower().endswith('.jpeg'):
+  elif path.lower().endswith('.jpg') or path.lower().endswith('.jpeg') or path.lower().endswith('.png'):
     parts = path.split('|')
     # render the html page
     if raw == 0:
