@@ -62,6 +62,8 @@ def gen_index(path):
   <link rel="icon" type="image/svg+xml" href="/icon.svg">""")
   print(f"""
   <style>
+  body {{ color: #eee; background: #121212; }}
+  a {{ color: #809fff; }}
   div.polaroid {{ display: inline-block; padding: 2px; border-style: solid; border-width: 1px; margin: 2px; }}
   div.container {{ text-align: center; }}
   img {{
@@ -168,6 +170,8 @@ def gen_page(parts):
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/icon.svg">""")
   print("""<style>
+  body { color: #eee; background: #121212; }
+  a { color: #809fff; }
   * {
     margin: 0.01vh;
     padding: 0.01vh;
